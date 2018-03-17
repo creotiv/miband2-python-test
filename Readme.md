@@ -17,13 +17,13 @@ pip2 install  bluepy --user
 
 On the first run, you need to init your device with a new key:
 ```sh
-miband2-auth.py YOUR_MAC --init
+miband2.py YOUR_MAC --init
 ```
 
 After that, you can run some sample tests:
 ```sh
-miband2-auth.py YOUR_MAC --notify
-miband2-auth.py YOUR_MAC --heart
+miband2.py YOUR_MAC --notify
+miband2.py YOUR_MAC --heart
 ```
 
 ## Cheatsheet
