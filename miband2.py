@@ -17,6 +17,9 @@ UUID_CHAR_ALERT = "00002a0600001000800000805f9b34fb"
 UUID_SVC_HEART_RATE = "0000180d00001000800000805f9b34fb"
 UUID_CHAR_HRM_MEASURE = "00002a3700001000800000805f9b34fb"
 UUID_CHAR_HRM_CONTROL = "00002a3900001000800000805f9b34fb"
+# Battery
+UUID_SVC_BATTERY = "0000fee0-0000-1000-8000-00805f9b34fb"
+UUID_CHAR_BATTERY = "00000006-0000-3512-2118-0009af100700"
 
 HRM_COMMAND = 0x15
 HRM_MODE_SLEEP      = 0x00
@@ -24,6 +27,49 @@ HRM_MODE_CONTINUOUS = 0x01
 HRM_MODE_ONE_SHOT   = 0x02
 
 CCCD_UUID = 0x2902
+
+class BatteryInfo(object):
+
+    def __init__(self, bytes):
+        self.bytes = bytes
+
+    def unpuck(self):
+        level = struct.unpack('b', self.bytes[1])[0] if len(self.bytes) >= 2 else None
+        last_level = struct.unpack('b', self.bytes[19])[0] if len(self.bytes) >= 20 else None
+        status = 'normal' if struct.unpack('b', self.bytes[2])[0] == 0 else "charging"
+        month_last_charge = struct.unpack('b', self.bytes[13])[0] if len(self.bytes) >= 14 else None
+        day_last_charge = struct.unpack('b', self.bytes[14])[0] if len(self.bytes) >= 15 else None
+        year_last_charge = struct.unpack('h', self.bytes[11:13])[0] if len(self.bytes) >= 13 else None
+        h_last_charge = struct.unpack('b', self.bytes[15])[0] if len(self.bytes) >= 16 else None
+        m_last_charge = struct.unpack('b', self.bytes[16])[0] if len(self.bytes) >= 17 else None
+        s_last_charge = struct.unpack('b', self.bytes[17])[0] if len(self.bytes) >= 18 else None
+
+        year_off = struct.unpack('h', self.bytes[3:5])[0] if len(self.bytes) >= 4 else None
+        month_off = struct.unpack('b', self.bytes[5])[0] if len(self.bytes) >= 14 else None
+        day_off = struct.unpack('b', self.bytes[6])[0] if len(self.bytes) >= 15 else None
+        year_off = struct.unpack('h', self.bytes[3:5])[0] if len(self.bytes) >= 13 else None
+        h_last_off = struct.unpack('b', self.bytes[7])[0] if len(self.bytes) >= 16 else None
+        m_last_off = struct.unpack('b', self.bytes[8])[0] if len(self.bytes) >= 17 else None
+        s_last_off = struct.unpack('b', self.bytes[9])[0] if len(self.bytes) >= 18 else None
+
+        # WTF?
+        # struct.unpack('b', self.bytes[10])
+        # struct.unpack('b', self.bytes[18])
+        # print struct.unpack('b', self.bytes[10]), struct.unpack('b', self.bytes[18])
+
+        res = {
+            "status": status,
+            "level": level,
+            "last_level": last_level,
+            "last_level": last_level,
+            "last_charge": '%s/%s/%s %s:%s:%s' % (
+                day_last_charge, month_last_charge, year_last_charge, h_last_charge, m_last_charge, s_last_charge
+            ),
+            "last_off": '%s/%s/%s %s:%s:%s' % (
+                day_off, month_off, year_off, h_last_off, m_last_off, s_last_off
+            )
+        }
+        return res
 
 class MiBand2(Peripheral):
     _KEY = b'\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x40\x41\x42\x43\x44\x45'
@@ -42,6 +88,10 @@ class MiBand2(Peripheral):
         svc = self.getServiceByUUID(UUID_SVC_ALERT)
         self.char_alert = svc.getCharacteristics(UUID_CHAR_ALERT)[0]
 
+        # Battery service
+        svc = self.getServiceByUUID(UUID_SVC_BATTERY)
+        self.char_battery = svc.getCharacteristics(UUID_CHAR_BATTERY)[0]
+        
         svc = self.getServiceByUUID(UUID_SVC_HEART_RATE)
         self.char_hrm_ctrl = svc.getCharacteristics(UUID_CHAR_HRM_CONTROL)[0]
         self.char_hrm = svc.getCharacteristics(UUID_CHAR_HRM_MEASURE)[0]
@@ -177,6 +227,8 @@ def main():
         band.authenticate()
 
     band.init_after_auth()
+    
+    print "Battery info:", BatteryInfo(band.char_battery.read()).unpuck()
 
     if arg.notify:
         print("Sending message notification...")
