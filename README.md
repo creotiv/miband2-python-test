@@ -12,9 +12,9 @@ He also wrote a nice article here: [Mi Band 2, Part 1: Authentication](https://l
 It's best to unbind your Mi Band 2 from MiFit App first.  
 You should be able to bind it back again, but no guaranee here ;)
 
-Next, install the bluepy library:
+Next, install `Python 2` or `Python 3` and the `bluepy` library:
 ```sh
-pip2 install bluepy --user
+pip install bluepy --user
 ```
 
 We're good to go!  
