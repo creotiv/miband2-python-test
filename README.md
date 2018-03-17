@@ -12,7 +12,7 @@ First, it's best to unbind your Mi Band 2 from MiFit App.
 You should be able to bind it back again, but no guaranee here ;)
 
 ```sh
-pip2 install  bluepy --user
+pip2 install bluepy --user
 ```
 
 On the first run, you need to init your device with a new key:
