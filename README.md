@@ -9,19 +9,21 @@ He also wrote a nice article here: [Mi Band 2, Part 1: Authentication](https://l
 
 ## Setting up
 
-First, it's best to unbind your Mi Band 2 from MiFit App.  
+It's best to unbind your Mi Band 2 from MiFit App first.  
 You should be able to bind it back again, but no guaranee here ;)
 
+Next, install the bluepy library:
 ```sh
 pip2 install bluepy --user
 ```
 
+We're good to go!  
 On the first run, you need to init your device with a new key:
 ```sh
 miband2.py YOUR_MAC --init
 ```
 
-After that, you can run some sample tests:
+Now you can run some samples:
 ```sh
 miband2.py YOUR_MAC --notify
 miband2.py YOUR_MAC --heart
